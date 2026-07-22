@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Case Management Dossier</title>
+    <!-- Tailwind CSS for high-fidelity professional UI -->
+    <style>
+        /* ══════════════════════════════════════════════════════════════
+           COMPILED UTILITY CSS — replaces the Tailwind CDN script.
+           The CDN build (cdn.tailwindcss.com) is a runtime JIT compiler
+           and is explicitly not supported for production use — Tailwind
+           logs a console warning every load. This block is a hand-built,
+           self-contained equivalent covering exactly the classes this
+           file uses, so the app has zero external dependencies and no
+           more console warning. ══════════════════════════════════════ */
+        *,*::before,*::after{box-sizing:border-box;border-width:0;border-style:solid;border-color:#374151;}
+        html{line-height:1.5;-webkit-text-size-adjust:100%;}
+        body{margin:0;}
+        button,input,textarea,select{font-family:inherit;font-size:100%;color:inherit;}
+        button{cursor:pointer;background-color:transparent;background-image:none;}
+        img,video{display:block;max-width:100%;height:auto;}
+        h1,h2,h3,p{margin:0;font-size:inherit;font-weight:inherit;}
+
+        /* Layout */
+        .block{display:block;}
+        .flex{display:flex;}
+        .grid{display:grid;}
+        .hidden{display:none;}
+        .relative{position:relative;}
+        .absolute{position:absolute;}
+        .overflow-hidden{overflow:hidden;}
+        .overflow-y-auto{overflow-y:auto;}
+        .flex-1{flex:1 1 0%;}
+        .flex-col{flex-direction:column;}
+        .flex-wrap{flex-wrap:wrap;}
+        .items-center{align-items:center;}
+        .justify-between{justify-content:space-between;}
+        .justify-center{justify-content:center;}
+        .grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr));}
+        .col-span-2{grid-column:span 2 / span 2;}
+        .min-h-screen{min-height:100vh;}
+        .h-full{height:100%;}
+        .h-\[calc\(100vh-73px\)\]{height:calc(100vh - 73px);}
+        .w-full{width:100%;}
+        .w-1\/3{width:33.333333%;}
+        .w-2\/3{width:66.666667%;}
+        .w-20{width:5rem;}
+        .w-3{width:0.75rem;}
+        .h-20{height:5rem;}
+        .h-3{height:0.75rem;}
+        .max-h-64{max-height:16rem;}
+        .max-w-xs{max-width:20rem;}
+        .top-4{top:1rem;}
+        .right-4{right:1rem;}
+
+        /* Spacing */
+        .p-1{padding:.25rem;} .p-2{padding:.5rem;} .p-4{padding:1rem;} .p-6{padding:1.5rem;}
+        .px-2{padding-left:.5rem;padding-right:.5rem;}
+        .px-3{padding-left:.75rem;padding-right:.75rem;}
+        .px-4{padding-left:1rem;padding-right:1rem;}
+        .px-6{padding-left:1.5rem;padding-right:1.5rem;}
+        .py-0\.5{padding-top:.125rem;padding-bottom:.125rem;}
+        .py-1{padding-top:.25rem;padding-bottom:.25rem;}
+        .py-1\.5{padding-top:.375rem;padding-bottom:.375rem;}
+        .py-2{padding-top:.5rem;padding-bottom:.5rem;}
+        .py-4{padding-top:1rem;padding-bottom:1rem;}
+        .pb-2{padding-bottom:.5rem;}
+        .pt-2{padding-top:.5rem;}
+        .pt-4{padding-top:1rem;}
+        .mb-1{margin-bottom:.25rem;}
+        .mb-2{margin-bottom:.5rem;}
+        .mt-1{margin-top:.25rem;}
+        .mt-2{margin-top:.5rem;}
+        .mt-3{margin-top:.75rem;}
+        .mt-auto{margin-top:auto;}
+        .ml-auto{margin-left:auto;}
+        .gap-2{gap:.5rem;} .gap-4{gap:1rem;}
+        .space-x-2>*+*{margin-left:.5rem;}
+        .space-x-3>*+*{margin-left:.75rem;}
+        .space-x-4>*+*{margin-left:1rem;}
+        .space-y-2>*+*{margin-top:.5rem;}
+        .space-y-3>*+*{margin-top:.75rem;}
+        .space-y-4>*+*{margin-top:1rem;}
+        .space-y-6>*+*{margin-top:1.5rem;}
+
+        /* Typography */
+        .font-sans{font-family:ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;}
+        .text-xs{font-size:.75rem;line-height:1rem;}
+        .text-sm{font-size:.875rem;line-height:1.25rem;}
+        .text-lg{font-size:1.125rem;line-height:1.75rem;}
+        .text-xl{font-size:1.25rem;line-height:1.75rem;}
+        .text-\[10px\]{font-size:10px;}
+        .font-medium{font-weight:500;}
+        .font-semibold{font-weight:600;}
+        .font-bold{font-weight:700;}
+        .uppercase{text-transform:uppercase;}
+        .italic{font-style:italic;}
+        .text-center{text-align:center;}
+        .text-right{text-align:right;}
+        .tracking-tight{letter-spacing:-.025em;}
+        .tracking-wide{letter-spacing:.025em;}
+        .tracking-wider{letter-spacing:.05em;}
+        .truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+        .leading-relaxed{line-height:1.625;}
+        .whitespace-pre-wrap{white-space:pre-wrap;}
+
+        /* Colors — background */
+        .bg-black{background-color:#000;}
+        .bg-white{background-color:#fff;}
+        .bg-gray-800{background-color:#1f2937;}
+        .bg-gray-900{background-color:#111827;}
+        .bg-gray-950{background-color:#030712;}
+        .bg-red-500{background-color:#ef4444;}
+        .bg-red-950\/40{background-color:rgba(69,10,10,.4);}
+        .bg-blue-600{background-color:#2563eb;}
+        .bg-emerald-600{background-color:#059669;}
+        .bg-blue-500\/20{background-color:rgba(59,130,246,.2);}
+        .bg-amber-500\/20{background-color:rgba(245,158,11,.2);}
+        .bg-emerald-500\/20{background-color:rgba(16,185,129,.2);}
+        .bg-purple-500\/20{background-color:rgba(168,85,247,.2);}
+        .hover\:bg-red-900\/60:hover{background-color:rgba(127,29,29,.6);}
+        .hover\:bg-blue-500:hover{background-color:#3b82f6;}
+        .hover\:bg-emerald-500:hover{background-color:#10b981;}
+        .file\:bg-gray-800::file-selector-button{background-color:#1f2937;}
+        .hover\:file\:bg-gray-700:hover::file-selector-button{background-color:#374151;}
+
+        /* Colors — text */
+        .text-black{color:#000;}
+        .text-white{color:#fff;}
+        .text-gray-100{color:#f3f4f6;}
+        .text-gray-200{color:#e5e7eb;}
+        .text-gray-300{color:#d1d5db;}
+        .text-gray-400{color:#9ca3af;}
+        .text-gray-500{color:#6b7280;}
+        .text-gray-600{color:#4b5563;}
+        .text-red-400{color:#f87171;}
+        .text-red-600{color:#dc2626;}
+        .text-blue-400{color:#60a5fa;}
+        .text-emerald-400{color:#34d399;}
+        .text-amber-400{color:#fbbf24;}
+        .text-purple-400{color:#c084fc;}
+        .hover\:text-red-400:hover{color:#f87171;}
+        .file\:text-gray-300::file-selector-button{color:#d1d5db;}
+        .file\:text-xs::file-selector-button{font-size:.75rem;}
+        .file\:font-semibold::file-selector-button{font-weight:600;}
+
+        /* Colors — border */
+        .border{border-width:1px;}
+        .border-b{border-bottom-width:1px;}
+        .border-t{border-top-width:1px;}
+        .border-r{border-right-width:1px;}
+        .border-gray-700{border-color:#374151;}
+        .border-gray-800{border-color:#1f2937;}
+        .border-red-800\/60{border-color:rgba(153,27,27,.6);}
+        .border-blue-800\/60{border-color:rgba(30,64,175,.6);}
+        .border-amber-800\/60{border-color:rgba(146,64,14,.6);}
+        .border-emerald-800\/60{border-color:rgba(6,95,70,.6);}
+        .border-purple-800\/60{border-color:rgba(107,33,168,.6);}
+        .focus\:border-blue-500:focus{border-color:#3b82f6;}
+        .focus\:border-emerald-500:focus{border-color:#10b981;}
+        .file\:border-0::file-selector-button{border-width:0;}
+
+        /* Radius / shadow / effects */
+        .rounded{border-radius:.25rem;}
+        .rounded-full{border-radius:9999px;}
+        .rounded-lg{border-radius:.5rem;}
+        .rounded-xl{border-radius:.75rem;}
+        .file\:rounded::file-selector-button{border-radius:.25rem;}
+        .shadow{box-shadow:0 1px 3px 0 rgba(0,0,0,.3);}
+        .shadow-md{box-shadow:0 4px 6px -1px rgba(0,0,0,.3);}
+        .shadow-lg{box-shadow:0 10px 15px -3px rgba(0,0,0,.4);}
+        .shadow-xl{box-shadow:0 20px 25px -5px rgba(0,0,0,.4);}
+        .shadow-blue-900\/20{box-shadow:0 4px 10px rgba(30,58,138,.2);}
+        .opacity-0{opacity:0;}
+        .group:hover .group-hover\:opacity-100{opacity:1;}
+        .cursor-pointer{cursor:pointer;}
+        .transition{transition-property:color,background-color,border-color,opacity,box-shadow,transform;transition-duration:.15s;}
+        .resize-none{resize:none;}
+        .object-contain{object-fit:contain;}
+        .object-cover{object-fit:cover;}
+        .animate-pulse{animation:tw-pulse 2s cubic-bezier(.4,0,.6,1) infinite;}
+        @keyframes tw-pulse{0%,100%{opacity:1;}50%{opacity:.5;}}
+        .file\:mr-4::file-selector-button{margin-right:1rem;}
+        .file\:py-1::file-selector-button{padding-top:.25rem;padding-bottom:.25rem;}
+        .file\:px-2::file-selector-button{padding-left:.5rem;padding-right:.5rem;}
+        .focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px;}
+
+        /* Print variants */
+        @media print {
+            .print\:hidden{display:none!important;}
+            .print\:block{display:block!important;}
+            .print\:p-4{padding:1rem!important;}
+            .print\:border{border-width:1px!important;}
+            .print\:border-black{border-color:#000!important;}
+            .print\:border-gray-300{border-color:#d1d5db!important;}
+            .print\:rounded-xl{border-radius:.75rem!important;}
+            .print\:text-black{color:#000!important;}
+            .print\:text-gray-600{color:#4b5563!important;}
+            .print\:whitespace-pre-wrap{white-space:pre-wrap!important;}
+        }
+    </style>
+    <style>
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #111827; }
+        ::-webkit-scrollbar-thumb { background: #374151; border-radius: 4px; }
+
+        /* ADVANCED HIGH-FIDELITY PRINT ENGINE */
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                font-size: 11pt;
+            }
+            .no-print {
+                display: none !important;
+            }
+            main {
+                display: block !important;
+                height: auto !important;
+                overflow: visible !important;
+            }
+            .panel-dossier {
+                width: 100% !important;
+                border-right: none !important;
+                padding: 0 !important;
+                margin-bottom: 2rem;
+            }
+            .panel-timeline {
+                width: 100% !important;
+                padding: 0 !important;
+            }
+            .print-card {
+                background: #ffffff !important;
+                border: 1px solid #9ca3af !important;
+                color: #000000 !important;
+                page-break-inside: avoid;
+                box-shadow: none !important;
+                margin-bottom: 1rem !important;
+                border-radius: 6px !important;
+            }
+            .print-badge {
+                border: 1px solid #000000 !important;
+                color: #000000 !important;
+                background: #f3f4f6 !important;
+            }
+            input, textarea, select {
+                background: transparent !important;
+                border: none !important;
+                padding: 0 !important;
+                color: #000000 !important;
+                font-weight: bold;
+                resize: none !important;
+            }
+            textarea {
+                height: auto !important;
+            }
+            .print-header-block {
+                display: flex !important;
+                justify-content: space-between;
+                align-items: center;
+                border-bottom: 2px solid #000000 !important;
+                padding-bottom: 15px;
+                margin-bottom: 25px;
+            }
+            /* Force images to display during browser print execution */
+            #printCompLogo {
+                display: block !important;
+                max-height: 60px !important;
+                width: auto !important;
+            }
+            #dossierPhoto {
+                display: block !important;
+                width: 80px !important;
+                height: 80px !important;
+                object-fit: cover !important;
+                border: 1px solid #000000 !important;
+                border-radius: 4px !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-gray-100 font-sans min-h-screen flex flex-col">
+
+    <!-- PRINT-ONLY BRANDED CORPORATE HEADER -->
+    <div class="hidden print-header-block">
+        <div class="flex items-center space-x-4">
+            <img id="printCompLogo" src="" alt="Corporate Logo">
+            <div>
+                <h1 id="printCompName" class="text-lg font-bold tracking-tight text-black uppercase">CORPORATE INCIDENT REPORT</h1>
+                <p id="printCompDetails" class="text-xs text-gray-600 uppercase tracking-wider"></p>
+            </div>
+        </div>
+        <div class="text-right">
+            <h2 class="text-sm font-bold tracking-wider text-red-600">STRICTLY CONFIDENTIAL</h2>
+            <p class="text-[10px] text-gray-500 uppercase mt-1">Generated: <span id="printReportDate"></span></p>
+        </div>
+    </div>
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-gray-900 border-b border-gray-800 px-6 py-4 flex justify-between items-center shadow-lg no-print">
+        <div class="flex items-center space-x-3">
+            <div class="h-3 w-3 bg-red-500 rounded-full animate-pulse"></div>
+            <h1 class="text-xl font-bold tracking-wider text-gray-200">INTERNAL SECURITY DIVISION: CASE TRACKER</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+            <button onclick="generatePDF()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded shadow transition tracking-wide flex items-center space-x-2">
+                <span>📄</span> <span>GENERATE PDF REPORT</span>
+            </button>
+            <div class="text-sm bg-gray-800 px-3 py-1.5 rounded text-gray-400 border border-gray-700">
+                🔒 LOCAL STORAGE MODE
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Workspace -->
+    <main class="flex-1 flex overflow-hidden h-[calc(100vh-73px)] print-full-width">
+        
+        <!-- LEFT PANEL: THE PERSONNEL DOSSIER & CORPORATE BRANDING -->
+        <section class="w-1/3 bg-gray-900 p-6 border-r border-gray-800 overflow-y-auto flex flex-col space-y-6 panel-dossier">
+            
+            <!-- Corporate Identity Setup (No-Print Dashboard Controls) -->
+            <div class="bg-gray-950 p-4 rounded-xl border border-gray-800 space-y-3 no-print">
+                <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider">🏢 Corporate Branding Configuration</h3>
+                <div class="space-y-2">
+                    <input id="compName" type="text" placeholder="Company Name" class="bg-gray-900 text-xs rounded p-2 border border-gray-700 w-full focus:outline-none focus:border-emerald-500" onchange="saveDossier()">
+                    <input id="compDetails" type="text" placeholder="Department / Sub-text (e.g. Global Security)" class="bg-gray-900 text-xs rounded p-2 border border-gray-700 w-full focus:outline-none focus:border-emerald-500" onchange="saveDossier()">
+                    <div>
+                        <label class="block text-[10px] text-gray-500 font-bold uppercase mb-1">Upload Corporate Logo Image</label>
+                        <input type="file" id="compLogoInput" accept="image/*" class="text-xs text-gray-400 w-full file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700 cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-b border-gray-800 pb-2 no-print">
+                <h2 class="text-sm font-semibold text-blue-400 uppercase tracking-wide">📋 Subject Personnel Dossier</h2>
+            </div>
+
+            <!-- Profile Identity Card -->
+            <div class="bg-gray-950 p-4 rounded-xl border border-gray-800 space-y-4 print-card">
+                <div class="flex items-center space-x-4">
+                    <div class="h-20 w-20 bg-gray-800 rounded-lg border border-gray-700 flex items-center justify-center text-gray-500 overflow-hidden relative">
+                        <img id="dossierPhoto" src="" class="hidden w-full h-full object-cover">
+                        <span id="photoPlaceholder" class="text-xs text-center p-1 print:hidden">No Image Loaded</span>
+                    </div>
+                    <div class="flex-1 space-y-2">
+                        <label class="hidden print:block text-[10px] text-gray-500 font-bold uppercase">Subject Target Name</label>
+                        <input id="empName" type="text" placeholder="Employee Full Name" class="bg-gray-900 text-sm font-bold rounded p-2 border border-gray-700 w-full focus:outline-none focus:border-blue-500" onchange="saveDossier()">
+                        <label class="hidden print:block text-[10px] text-gray-500 font-bold uppercase">Current Assignment / Role</label>
+                        <input id="empTitle" type="text" placeholder="Job Title / Role" class="bg-gray-900 text-xs rounded p-2 border border-gray-700 w-full focus:outline-none focus:border-blue-500" onchange="saveDossier()">
+                    </div>
+                </div>
+                <div class="mt-2 no-print">
+                    <label class="block text-[10px] text-gray-500 font-bold uppercase mb-1">Load Subject Photo</label>
+                    <input type="file" id="photoInput" accept="image/*" class="text-xs text-gray-400 w-full file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700 cursor-pointer">
+                </div>
+            </div>
+
+            <!-- Metadata Parameters -->
+            <div class="space-y-3 print-card print:p-4 print:border print:rounded-xl">
+                <div>
+                    <label class="text-xs text-gray-400 print:text-gray-600 font-bold uppercase text-[10px]">Employee ID Code</label>
+                    <input id="empId" type="text" class="w-full bg-gray-950 border border-gray-800 rounded p-2 text-sm mt-1 focus:outline-none focus:border-blue-500" placeholder="e.g., EMP-8821" onchange="saveDossier()">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 print:text-gray-600 font-bold uppercase text-[10px]">Department / Business Unit</label>
+                    <input id="empDept" type="text" class="w-full bg-gray-950 border border-gray-800 rounded p-2 text-sm mt-1 focus:outline-none focus:border-blue-500" placeholder="e.g., Operations" onchange="saveDossier()">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 print:text-gray-600 font-bold uppercase text-[10px]">Assigned Hardware Assets</label>
+                    <input id="empAssets" type="text" class="w-full bg-gray-950 border border-gray-800 rounded p-2 text-sm mt-1 focus:outline-none focus:border-blue-500" placeholder="e.g., Laptop Mac Pro SN-3382" onchange="saveDossier()">
+                </div>
+                <div>
+                    <label class="text-xs text-gray-400 print:text-gray-600 font-bold uppercase text-[10px]">Background Investigation Scope & Intel</label>
+                    <textarea id="empIntel" rows="4" class="w-full bg-gray-950 border border-gray-800 rounded p-2 text-sm mt-1 focus:outline-none focus:border-blue-500 resize-none print:whitespace-pre-wrap" placeholder="Enter historical context..." onchange="saveDossier()"></textarea>
+                </div>
+            </div>
+
+            <!-- Purge / Clear Button -->
+            <div class="pt-4 mt-auto no-print">
+                <button onclick="clearAllData()" class="w-full bg-red-950/40 hover:bg-red-900/60 border border-red-800/60 text-red-400 text-xs py-2 rounded transition font-medium tracking-wide">
+                    ⚠️ PURGE ENTIRE CASE FILE
+                </button>
+            </div>
+        </section>
+
+        <!-- RIGHT PANEL: INTERACTIVE TIMELINE FEED -->
+        <section class="w-2/3 p-6 overflow-y-auto flex flex-col space-y-6 bg-gray-950 panel-timeline">
+            
+            <!-- Quick Log Input Station -->
+            <div class="bg-gray-900 border border-gray-800 p-4 rounded-xl shadow-xl space-y-4 no-print">
+                <h3 class="text-sm font-bold uppercase text-gray-300 tracking-wider">⚡ Rapid Incident Logger</h3>
+                
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Classification Tag</label>
+                        <select id="logTag" class="w-full bg-gray-950 border border-gray-800 rounded p-2 text-xs focus:outline-none focus:border-blue-500 text-gray-300 font-semibold">
+                            <option value="#CCTV Footage">📹 #CCTV Footage</option>
+                            <option value="#General Findings">🌐 #General Findings</option>
+                            <option value="#Visual Proof">📸 #Visual Proof</option>
+                            <option value="#Confirmed">✅ #Confirmed</option>
+                            <option value="#Verified">🛡️ #Verified</option>
+                        </select>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-xs text-gray-400 mb-1">Target Location / Specific Asset Context</label>
+                        <input id="logLocation" type="text" placeholder="e.g., West Corridor Camera 3" class="w-full bg-gray-950 border border-gray-800 rounded p-2 text-xs focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Geo-tag Latitude <span class="text-gray-600">(optional)</span></label>
+                        <input id="logLat" type="text" placeholder="e.g., -25.6980" class="w-full bg-gray-950 border border-gray-800 rounded p-2 text-xs focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Geo-tag Longitude <span class="text-gray-600">(optional)</span></label>
+                        <input id="logLng" type="text" placeholder="e.g., 28.1830" class="w-full bg-gray-950 border border-gray-800 rounded p-2 text-xs focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div class="flex items-end">
+                        <span class="text-[10px] text-gray-500 leading-tight">Only if this entry ties to an AO geo-location. Leave blank for internal-asset entries (camera refs, etc).</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Evidence Summary & Observations</label>
+                    <textarea id="logNotes" rows="2" placeholder="Describe exactly what evidence was observed..." class="w-full bg-gray-950 border border-gray-800 rounded p-2 text-xs focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-gray-800">
+                    <div>
+                        <label class="block text-xs text-gray-400 mb-1">Attach Local Video Clip / Image</label>
+                        <input type="file" id="mediaInput" accept="video/*,image/*" class="text-xs text-gray-400 file:mr-4 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-gray-800 file:text-gray-300 hover:file:bg-gray-700 cursor-pointer">
+                    </div>
+                    <button onclick="addTimelineEntry()" class="bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs px-6 py-2 rounded-lg transition tracking-wide shadow-md shadow-blue-900/20">
+                        ⚡ COMMIT TO TIMELINE
+                    </button>
+                </div>
+            </div>
+
+            <!-- The Running Timeline Feed Grid -->
+            <div class="space-y-4">
+                <div class="flex justify-between items-center border-b border-gray-800 pb-2 print:border-black">
+                    <h3 class="text-sm font-bold uppercase text-gray-400 print:text-black tracking-wider">⏱️ Evidence Audit Chronology</h3>
+                    
+                    <!-- LIVE FILTER MATRIX -->
+                    <div class="flex items-center space-x-2 no-print">
+                        <label class="text-xs text-gray-500 font-medium">Filter:</label>
+                        <select id="filterTag" onchange="renderTimeline()" class="bg-gray-900 text-xs rounded px-2 py-1 border border-gray-800 focus:outline-none focus:border-blue-500 text-gray-300">
+                            <option value="ALL">All Findings</option>
+                            <option value="#CCTV Footage">📹 #CCTV Footage</option>
+                            <option value="#General Findings">🌐 #General Findings</option>
+                            <option value="#Visual Proof">📸 #Visual Proof</option>
+                            <option value="#Confirmed">✅ #Confirmed</option>
+                            <option value="#Verified">🛡️ #Verified</option>
+                        </select>
+                        <span id="entryCount" class="text-xs bg-gray-800 px-2 py-0.5 rounded text-gray-400">0 Cached</span>
+                    </div>
+                </div>
+                
+                <!-- Timeline container where JavaScript pushes items -->
+                <div id="timelineContainer" class="space-y-4"></div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- UI Log Operations Engine -->
+    <script>
+        // Storage allocations (Text details are separated from large media to protect quotas)
+        let dossierData = JSON.parse(localStorage.getItem('dossierData')) || { 
+            name:'', title:'', id:'', dept:'', assets:'', intel:'', photo:'',
+            compName:'', compDetails:'', compLogo:''
+        };
+        let timelineEntries = []; // Retained in session storage to handle unlimited file sizes safely
+
+        window.onload = function() {
+            document.getElementById('empName').value = dossierData.name || '';
+            document.getElementById('empTitle').value = dossierData.title || '';
+            document.getElementById('empId').value = dossierData.id || '';
+            document.getElementById('empDept').value = dossierData.dept || '';
+            document.getElementById('empAssets').value = dossierData.assets || '';
+            document.getElementById('empIntel').value = dossierData.intel || '';
+            
+            document.getElementById('compName').value = dossierData.compName || '';
+            document.getElementById('compDetails').value = dossierData.compDetails || '';
+            
+            if (dossierData.photo) {
+                const img = document.getElementById('dossierPhoto');
+                img.src = dossierData.photo;
+                img.classList.remove('hidden');
+                document.getElementById('photoPlaceholder').classList.add('hidden');
+            }
+            if (dossierData.compLogo) {
+                document.getElementById('printCompLogo').src = dossierData.compLogo;
+            }
+            renderTimeline();
+        };
+
+        function saveDossier() {
+            dossierData.name = document.getElementById('empName').value;
+            dossierData.title = document.getElementById('empTitle').value;
+            dossierData.id = document.getElementById('empId').value;
+            dossierData.dept = document.getElementById('empDept').value;
+            dossierData.assets = document.getElementById('empAssets').value;
+            dossierData.intel = document.getElementById('empIntel').value;
+            dossierData.compName = document.getElementById('compName').value;
+            dossierData.compDetails = document.getElementById('compDetails').value;
+            
+            localStorage.setItem('dossierData', JSON.stringify(dossierData));
+        }
+
+        document.getElementById('compLogoInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    dossierData.compLogo = event.target.result;
+                    document.getElementById('printCompLogo').src = event.target.result;
+                    saveDossier();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('photoInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    dossierData.photo = event.target.result;
+                    const img = document.getElementById('dossierPhoto');
+                    img.src = event.target.result;
+                    img.classList.remove('hidden');
+                    document.getElementById('photoPlaceholder').classList.add('hidden');
+                    saveDossier();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function addTimelineEntry() {
+            const tag = document.getElementById('logTag').value;
+            const location = document.getElementById('logLocation').value || 'System Core Matrix';
+            const notes = document.getElementById('logNotes').value;
+            const mediaFile = document.getElementById('mediaInput').files[0];
+            const latRaw = document.getElementById('logLat').value.trim();
+            const lngRaw = document.getElementById('logLng').value.trim();
+            const lat = latRaw ? parseFloat(latRaw) : null;
+            const lng = lngRaw ? parseFloat(lngRaw) : null;
+            const hasGeo = lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng);
+            if ((latRaw || lngRaw) && !hasGeo) {
+                alert('Latitude and Longitude must both be valid numbers, or both left blank.');
+                return;
+            }
+
+            if (!notes) {
+                alert('Please enter incident descriptive remarks.');
+                return;
+            }
+
+            const timestamp = new Date().toLocaleString('en-ZA');
+            
+            // Build entry layout object
+            const newEntry = { 
+                id: Date.now(), 
+                tag, 
+                location, 
+                notes, 
+                timestamp, 
+                mediaUrl: '', 
+                mediaType: mediaFile ? mediaFile.type : '',
+                lat: hasGeo ? lat : null,
+                lng: hasGeo ? lng : null
+            };
+
+            if (mediaFile) {
+                // Safeguard against browser memory limitation: Generate an immediate session pointer object URL
+                newEntry.mediaUrl = URL.createObjectURL(mediaFile);
+                commitEntry(newEntry);
+            } else {
+                commitEntry(newEntry);
+            }
+        }
+
+        function commitEntry(entry) {
+            timelineEntries.unshift(entry);
+            document.getElementById('logLocation').value = '';
+            document.getElementById('logNotes').value = '';
+            document.getElementById('mediaInput').value = '';
+            document.getElementById('logLat').value = '';
+            document.getElementById('logLng').value = '';
+            renderTimeline();
+        }
+
+        function deleteEntry(id) {
+            if(confirm('Permanently excise this item card from evidence chain?')) {
+                timelineEntries = timelineEntries.filter(item => item.id !== id);
+                renderTimeline();
+            }
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('timelineContainer');
+            const selectedFilter = document.getElementById('filterTag').value;
+            container.innerHTML = '';
+            
+            const filteredEntries = timelineEntries.filter(entry => {
+                return selectedFilter === 'ALL' || entry.tag === selectedFilter;
+            });
+
+            document.getElementById('entryCount').innerText = `${filteredEntries.length} Displayed`;
+
+            const colorMap = {
+                '#CCTV Footage': 'bg-blue-500/20 text-blue-400 border-blue-800/60',
+                '#General Findings': 'bg-gray-800 text-gray-400 border-gray-700',
+                '#Visual Proof': 'bg-amber-500/20 text-amber-400 border-amber-800/60',
+                '#Confirmed': 'bg-emerald-500/20 text-emerald-400 border-emerald-800/60',
+                '#Verified': 'bg-purple-500/20 text-purple-400 border-purple-800/60'
+            };
+
+            filteredEntries.forEach(entry => {
+                const badgeStyle = colorMap[entry.tag] || 'bg-gray-800 text-gray-400 border-gray-700';
+                
+                let mediaElement = '';
+                if (entry.mediaUrl) {
+                    if (entry.mediaType.startsWith('video/')) {
+                        mediaElement = `<div class="mt-3 rounded border border-gray-800 overflow-hidden bg-black no-print"><video controls src="${entry.mediaUrl}" class="w-full max-h-64"></video></div><p class="hidden print:block text-xs italic text-gray-500 mt-1">[Video Media Reference Logged Timeline Target: ${entry.tag}]</p>`;
+                    } else if (entry.mediaType.startsWith('image/')) {
+                        mediaElement = `<div class="mt-3 rounded border border-gray-800 overflow-hidden bg-black print:border-gray-300"><img src="${entry.mediaUrl}" class="w-full max-h-64 object-contain"></div>`;
+                    }
+                }
+
+                const card = `
+                    <div class="bg-gray-900 border border-gray-800 p-4 rounded-xl shadow relative group print-card">
+                        <button onclick="deleteEntry(${entry.id})" class="absolute top-4 right-4 text-gray-600 hover:text-red-400 transition text-xs opacity-0 group-hover:opacity-100 no-print">✕ Remove</button>
+                        <div class="flex flex-wrap items-center gap-2 mb-2">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wider print-badge ${badgeStyle}">${entry.tag}</span>
+                            <span class="text-xs text-gray-500 font-medium print:text-black">${entry.timestamp}</span>
+                            <span class="text-xs text-gray-400 italic ml-auto max-w-xs truncate print:text-black">📍 ${entry.location}</span>
+                        </div>
+                        <p class="text-sm text-gray-300 print:text-black leading-relaxed whitespace-pre-wrap mt-2">${entry.notes}</p>
+                        ${mediaElement}
+                        ${entry.lat != null && entry.lng != null ? `<a href="SICE_INTEL_HUB.html?tab=livemap&lat=${entry.lat}&lng=${entry.lng}&label=${encodeURIComponent(entry.location)}" target="_blank" class="no-print inline-flex items-center gap-1 mt-3 text-xs text-blue-400 hover:text-blue-300 border border-blue-900/60 bg-blue-950/30 px-2 py-1 rounded">🌍 View on Map (${entry.lat.toFixed(4)}, ${entry.lng.toFixed(4)})</a>` : ''}
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+        }
+
+        function generatePDF() {
+            // Force values explicitly into target layout references
+            document.getElementById('printCompName').innerText = document.getElementById('compName').value || "CORPORATE INCIDENT REPORT";
+            document.getElementById('printCompDetails').innerText = document.getElementById('compDetails').value || "INTERNAL SECURITY DIVISION";
+            document.getElementById('printReportDate').innerText = new Date().toLocaleString('en-ZA');
+            window.print();
+        }
+
+        function clearAllData() {
+            if (confirm('🚨 PROTOCOL ALERT: Hard wipe database completely? This action cannot be reversed.')) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

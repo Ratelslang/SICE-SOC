@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SICE — Site Map & Patrol Routes</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg:#060a0f;--bg2:#0a1018;--bg3:#0f1822;
+  --border:rgba(0,200,255,0.12);--border2:rgba(0,200,255,0.25);
+  --cyan:#00c8ff;--gold:#ffb300;--red:#ff3d3d;--green:#00ff88;--orange:#ff6b00;
+  --text:#c8e0f0;--text2:rgba(200,224,240,0.5);--text3:rgba(200,224,240,0.25);
+  --font:'Rajdhani',sans-serif;--mono:'Share Tech Mono',monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--font);height:100vh;overflow:hidden;display:flex;flex-direction:column;}
+
+/* TOP BAR */
+.topbar{display:flex;align-items:center;gap:12px;padding:0 16px;height:48px;background:var(--bg2);border-bottom:1px solid var(--border);flex-shrink:0;}
+.topbar-logo{font-family:var(--mono);font-size:13px;letter-spacing:4px;color:var(--cyan);}
+.topbar-spacer{flex:1;}
+.tb-btn{background:transparent;border:1px solid var(--border);color:var(--text2);padding:5px 12px;font-family:var(--mono);font-size:10px;letter-spacing:2px;cursor:pointer;border-radius:4px;text-transform:uppercase;transition:all 0.2s;}
+.tb-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.tb-btn.active{background:rgba(0,200,255,0.1);border-color:var(--cyan);color:var(--cyan);}
+.tb-btn.danger:hover{border-color:var(--red);color:var(--red);}
+.tb-btn.success{border-color:var(--green);color:var(--green);}
+.tb-btn.success:hover{background:rgba(0,255,136,0.1);}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;overflow:hidden;}
+
+/* SIDEBAR */
+.sidebar{width:220px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+.sidebar-section{padding:12px 10px 8px;}
+.sidebar-label{font-family:var(--mono);font-size:9px;letter-spacing:3px;color:var(--text3);text-transform:uppercase;margin-bottom:8px;}
+
+/* TOOLS */
+.tool-btn{display:flex;align-items:center;gap:8px;width:100%;padding:8px 10px;background:transparent;border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:10px;letter-spacing:1px;cursor:pointer;border-radius:4px;margin-bottom:4px;text-align:left;transition:all 0.2s;text-transform:uppercase;}
+.tool-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+.tool-btn.active{background:rgba(0,200,255,0.1);border-color:var(--cyan);color:var(--cyan);}
+.tool-btn.room{border-color:rgba(0,200,255,0.3);}
+.tool-btn.checkpoint{border-color:rgba(0,255,136,0.3);color:rgba(0,255,136,0.7);}
+.tool-btn.checkpoint:hover,.tool-btn.checkpoint.active{border-color:var(--green);color:var(--green);background:rgba(0,255,136,0.1);}
+.tool-btn.route{border-color:rgba(255,179,0,0.3);color:rgba(255,179,0,0.7);}
+.tool-btn.route:hover,.tool-btn.route.active{border-color:var(--gold);color:var(--gold);background:rgba(255,179,0,0.1);}
+.tool-btn.danger-tool{border-color:rgba(255,61,61,0.3);color:rgba(255,61,61,0.7);}
+.tool-btn.danger-tool:hover{border-color:var(--red);color:var(--red);background:rgba(255,61,61,0.1);}
+
+.sidebar-divider{border:none;border-top:1px solid var(--border);margin:6px 10px;}
+
+/* CHECKPOINTS LIST */
+.cp-list{padding:0 10px;}
+.cp-item{display:flex;align-items:center;gap:6px;padding:5px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;margin-bottom:4px;font-family:var(--mono);font-size:10px;color:var(--text2);cursor:pointer;transition:all 0.2s;}
+.cp-item:hover{border-color:var(--green);color:var(--green);}
+.cp-item .cp-dot{width:8px;height:8px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.cp-item .cp-time{margin-left:auto;font-size:9px;color:var(--text3);}
+
+/* PATROL LOG */
+.patrol-log{padding:0 10px;max-height:200px;overflow-y:auto;}
+.log-entry{padding:5px 8px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;margin-bottom:3px;font-family:var(--mono);font-size:9px;color:var(--text2);}
+.log-entry .log-time{color:var(--cyan);}
+.log-entry .log-cp{color:var(--green);}
+
+/* CANVAS AREA */
+.canvas-wrap{flex:1;position:relative;overflow:hidden;background:var(--bg3);}
+#canvas{display:block;cursor:crosshair;}
+
+/* GRID overlay */
+.canvas-wrap::before{
+  content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(0,200,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,200,255,0.04) 1px,transparent 1px);
+  background-size:40px 40px;pointer-events:none;z-index:1;
+}
+
+/* ZOOM CONTROLS */
+.zoom-controls{position:absolute;bottom:16px;right:16px;display:flex;flex-direction:column;gap:4px;z-index:10;}
+.zoom-btn{width:32px;height:32px;background:var(--bg2);border:1px solid var(--border);color:var(--text2);font-size:16px;cursor:pointer;border-radius:4px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
+.zoom-btn:hover{border-color:var(--cyan);color:var(--cyan);}
+
+/* STATUS BAR */
+.statusbar{height:28px;background:var(--bg2);border-top:1px solid var(--border);display:flex;align-items:center;gap:16px;padding:0 16px;flex-shrink:0;}
+.status-item{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:1px;}
+.status-item span{color:var(--cyan);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:8px;width:420px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,0.5);}
+.modal-header{display:flex;align-items:center;padding:16px 18px 12px;border-bottom:1px solid var(--border);}
+.modal-title{font-family:var(--mono);font-size:12px;letter-spacing:3px;color:var(--cyan);text-transform:uppercase;flex:1;}
+.modal-close{background:transparent;border:none;color:var(--text2);font-size:16px;cursor:pointer;}
+.modal-close:hover{color:var(--red);}
+.modal-body{padding:18px;display:flex;flex-direction:column;gap:12px;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-label{font-family:var(--mono);font-size:9px;letter-spacing:2px;color:var(--text3);text-transform:uppercase;}
+.form-input,.form-select{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font);font-size:14px;padding:8px 10px;border-radius:4px;outline:none;transition:border-color 0.2s;width:100%;}
+.form-input:focus,.form-select:focus{border-color:var(--cyan);}
+.form-select option{background:var(--bg2);}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;padding:12px 18px;border-top:1px solid var(--border);}
+.btn-cancel{background:transparent;border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:10px;letter-spacing:2px;padding:7px 14px;cursor:pointer;border-radius:4px;text-transform:uppercase;}
+.btn-cancel:hover{border-color:var(--red);color:var(--red);}
+.btn-save{background:rgba(0,200,255,0.1);border:1px solid var(--cyan);color:var(--cyan);font-family:var(--mono);font-size:10px;letter-spacing:2px;padding:7px 18px;cursor:pointer;border-radius:4px;text-transform:uppercase;}
+.btn-save:hover{background:rgba(0,200,255,0.2);}
+
+/* COLOR PICKER ROW */
+.color-row{display:flex;gap:6px;flex-wrap:wrap;}
+.color-swatch{width:24px;height:24px;border-radius:4px;cursor:pointer;border:2px solid transparent;transition:all 0.15s;}
+.color-swatch.selected,.color-swatch:hover{border-color:white;transform:scale(1.15);}
+
+/* NOTIF */
+.notif{position:fixed;bottom:40px;right:16px;background:var(--bg2);border:1px solid var(--cyan);color:var(--cyan);font-family:var(--mono);font-size:10px;letter-spacing:2px;padding:8px 14px;border-radius:4px;z-index:9999;opacity:0;transform:translateY(8px);transition:all 0.3s;pointer-events:none;}
+.notif.show{opacity:1;transform:translateY(0);}
+.notif.success{border-color:var(--green);color:var(--green);}
+.notif.error{border-color:var(--red);color:var(--red);}
+
+/* CONTEXT MENU */
+.ctx-menu{position:fixed;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:4px 0;z-index:200;display:none;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,0.4);}
+.ctx-menu.open{display:block;}
+.ctx-item{padding:7px 14px;font-family:var(--mono);font-size:10px;letter-spacing:1px;color:var(--text2);cursor:pointer;text-transform:uppercase;transition:all 0.15s;}
+.ctx-item:hover{background:rgba(0,200,255,0.08);color:var(--cyan);}
+.ctx-item.danger:hover{background:rgba(255,61,61,0.08);color:var(--red);}
+.ctx-sep{border-top:1px solid var(--border);margin:3px 0;}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<div class="notif" id="notif"></div>
+
+<!-- CONTEXT MENU -->
+<div class="ctx-menu" id="ctx-menu">
+  <div class="ctx-item" onclick="ctxAction('rename')">✏ Rename</div>
+  <div class="ctx-item" onclick="ctxAction('log-patrol')">✅ Log Patrol Visit</div>
+  <div class="ctx-item" onclick="ctxAction('change-color')">🎨 Change Color</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item danger" onclick="ctxAction('delete')">✕ Delete</div>
+</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-logo">🗺 SICE — SITE MAP & PATROL</div>
+  <div class="topbar-spacer"></div>
+  <button class="tb-btn" onclick="document.getElementById('bg-img-input').click()">⬆ Load Floor Plan</button>
+  <input type="file" id="bg-img-input" accept="image/*" style="display:none" onchange="loadBgImage(event)">
+  <button class="tb-btn" onclick="clearBg()">✕ Clear Image</button>
+  <button class="tb-btn success" onclick="exportData()">⬇ Export</button>
+  <button class="tb-btn" onclick="document.getElementById('import-input').click()">⬆ Import</button>
+  <input type="file" id="import-input" accept=".json" style="display:none" onchange="importData(event)">
+  <button class="tb-btn" onclick="printMap()">🖨 Print</button>
+  <button class="tb-btn danger" onclick="clearAll()">🗑 Clear All</button>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-label">Draw Tools</div>
+      <button class="tool-btn room active" id="tool-select" onclick="setTool('select')">↖ Select / Move</button>
+      <button class="tool-btn room" id="tool-room" onclick="setTool('room')">⬜ Draw Room/Zone</button>
+      <button class="tool-btn checkpoint" id="tool-checkpoint" onclick="setTool('checkpoint')">📍 Add Checkpoint</button>
+      <button class="tool-btn route" id="tool-route" onclick="setTool('route')">➡ Draw Route</button>
+      <button class="tool-btn" id="tool-text" onclick="setTool('text')">T Add Label</button>
+      <button class="tool-btn danger-tool" id="tool-delete" onclick="setTool('delete')">✕ Delete Item</button>
+    </div>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Checkpoints</div>
+    </div>
+    <div class="cp-list" id="cp-list">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--text3);padding:0 2px;">No checkpoints yet</div>
+    </div>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Patrol Log</div>
+      <button class="tool-btn success" onclick="startPatrol()" style="margin-bottom:6px;">▶ Start Patrol</button>
+      <button class="tool-btn danger-tool" onclick="endPatrol()">■ End Patrol</button>
+    </div>
+    <div class="patrol-log" id="patrol-log">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--text3);padding:0 2px;">No patrol logs yet</div>
+    </div>
+
+    <hr class="sidebar-divider">
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Saved Patrols</div>
+    </div>
+    <div class="cp-list" id="saved-patrols"></div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas-wrap" id="canvas-wrap">
+    <canvas id="canvas"></canvas>
+    <div class="zoom-controls">
+      <button class="zoom-btn" onclick="zoom(1.2)" title="Zoom In">+</button>
+      <button class="zoom-btn" onclick="zoom(0.8)" title="Zoom Out">−</button>
+      <button class="zoom-btn" onclick="resetZoom()" title="Reset">⌂</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- STATUS BAR -->
+<div class="statusbar">
+  <div class="status-item">TOOL: <span id="status-tool">SELECT</span></div>
+  <div class="status-item">ITEMS: <span id="status-items">0</span></div>
+  <div class="status-item">CHECKPOINTS: <span id="status-cp">0</span></div>
+  <div class="status-item">PATROL: <span id="status-patrol">INACTIVE</span></div>
+  <div class="status-item">ZOOM: <span id="status-zoom">100%</span></div>
+  <div class="status-item" style="margin-left:auto;">SICE SECURITY — SITE MAP v1.0</div>
+</div>
+
+<!-- ROOM MODAL -->
+<div class="modal-overlay" id="room-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="room-modal-title">Add Zone / Room</div>
+      <button class="modal-close" onclick="closeModal('room-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Zone Name</label>
+        <input class="form-input" id="room-name" placeholder="e.g. Gate A, Control Room..." type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Zone Type</label>
+        <select class="form-select" id="room-type">
+          <option value="room">Room</option>
+          <option value="zone">Zone</option>
+          <option value="entrance">Entrance/Gate</option>
+          <option value="restricted">Restricted Area</option>
+          <option value="parking">Parking</option>
+          <option value="perimeter">Perimeter</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Color</label>
+        <div class="color-row" id="room-colors">
+          <div class="color-swatch selected" style="background:rgba(0,200,255,0.3)" data-color="rgba(0,200,255,0.3)" onclick="selectColor(this)"></div>
+          <div class="color-swatch" style="background:rgba(0,255,136,0.3)" data-color="rgba(0,255,136,0.3)" onclick="selectColor(this)"></div>
+          <div class="color-swatch" style="background:rgba(255,179,0,0.3)" data-color="rgba(255,179,0,0.3)" onclick="selectColor(this)"></div>
+          <div class="color-swatch" style="background:rgba(255,61,61,0.3)" data-color="rgba(255,61,61,0.3)" onclick="selectColor(this)"></div>
+          <div class="color-swatch" style="background:rgba(150,100,255,0.3)" data-color="rgba(150,100,255,0.3)" onclick="selectColor(this)"></div>
+          <div class="color-swatch" style="background:rgba(255,100,0,0.3)" data-color="rgba(255,100,0,0.3)" onclick="selectColor(this)"></div>
+          <div class="color-swatch" style="background:rgba(200,200,200,0.15)" data-color="rgba(200,200,200,0.15)" onclick="selectColor(this)"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('room-modal')">Cancel</button>
+      <button class="btn-save" onclick="saveRoom()">Add Zone</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHECKPOINT MODAL -->
+<div class="modal-overlay" id="cp-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add Checkpoint</div>
+      <button class="modal-close" onclick="closeModal('cp-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Checkpoint Name</label>
+        <input class="form-input" id="cp-name" placeholder="e.g. CP-01, Main Gate..." type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Patrol Frequency</label>
+        <select class="form-select" id="cp-freq">
+          <option value="30">Every 30 minutes</option>
+          <option value="60">Every hour</option>
+          <option value="120">Every 2 hours</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <input class="form-input" id="cp-notes" placeholder="Special instructions..." type="text">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('cp-modal')">Cancel</button>
+      <button class="btn-save" onclick="saveCheckpoint()">Add Checkpoint</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEXT MODAL -->
+<div class="modal-overlay" id="text-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Add Label</div>
+      <button class="modal-close" onclick="closeModal('text-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Label Text</label>
+        <input class="form-input" id="text-content" placeholder="Enter label..." type="text">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Color</label>
+        <div class="color-row" id="text-colors">
+          <div class="color-swatch selected" style="background:#00c8ff" data-color="#00c8ff" onclick="selectTextColor(this)"></div>
+          <div class="color-swatch" style="background:#00ff88" data-color="#00ff88" onclick="selectTextColor(this)"></div>
+          <div class="color-swatch" style="background:#ffb300" data-color="#ffb300" onclick="selectTextColor(this)"></div>
+          <div class="color-swatch" style="background:#ff3d3d" data-color="#ff3d3d" onclick="selectTextColor(this)"></div>
+          <div class="color-swatch" style="background:#ffffff" data-color="#ffffff" onclick="selectTextColor(this)"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('text-modal')">Cancel</button>
+      <button class="btn-save" onclick="saveText()">Add Label</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ──────────────────────────────────────────────
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const wrap = document.getElementById('canvas-wrap');
+
+let tool = 'select';
+let items = [];
+let routes = [];
+let patrolLogs = [];
+let savedPatrols = [];
+let currentPatrol = null;
+let bgImage = null;
+let selectedItem = null;
+let selectedColor = 'rgba(0,200,255,0.3)';
+let selectedTextColor = '#00c8ff';
+let scale = 1;
+let panX = 0, panY = 0;
+let ctxTarget = null;
+
+// Drawing state
+let isDrawing = false;
+let drawStart = {x:0,y:0};
+let drawCurrent = {x:0,y:0};
+let routePoints = [];
+let isDragging = false;
+let dragOffset = {x:0,y:0};
+
+// ─── RESIZE ─────────────────────────────────────────────
+function resizeCanvas() {
+  canvas.width = wrap.clientWidth;
+  canvas.height = wrap.clientHeight;
+  redraw();
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+// ─── TOOL SELECTION ─────────────────────────────────────
+function setTool(t) {
+  tool = t;
+  document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById('tool-'+t);
+  if(el) el.classList.add('active');
+  document.getElementById('status-tool').textContent = t.toUpperCase();
+  routePoints = [];
+  if(t === 'select') canvas.style.cursor = 'default';
+  else if(t === 'delete') canvas.style.cursor = 'not-allowed';
+  else canvas.style.cursor = 'crosshair';
+  redraw();
+}
+
+// ─── COLOR SELECTION ────────────────────────────────────
+function selectColor(el) {
+  document.querySelectorAll('#room-colors .color-swatch').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedColor = el.dataset.color;
+}
+function selectTextColor(el) {
+  document.querySelectorAll('#text-colors .color-swatch').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedTextColor = el.dataset.color;
+}
+
+// ─── CANVAS COORDINATES ─────────────────────────────────
+function getCanvasPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - rect.left - panX) / scale,
+    y: (e.clientY - rect.top - panY) / scale
+  };
+}
+
+// ─── HIT TEST ───────────────────────────────────────────
+function hitTest(pos) {
+  // Check checkpoints first
+  for(let i = items.length-1; i >= 0; i--) {
+    const item = items[i];
+    if(item.type === 'checkpoint') {
+      const dx = pos.x - item.x, dy = pos.y - item.y;
+      if(Math.sqrt(dx*dx+dy*dy) < 16) return item;
+    } else if(item.type === 'room') {
+      if(pos.x >= item.x && pos.x <= item.x+item.w && pos.y >= item.y && pos.y <= item.y+item.h) return item;
+    } else if(item.type === 'text') {
+      if(pos.x >= item.x-5 && pos.x <= item.x+100 && pos.y >= item.y-16 && pos.y <= item.y+4) return item;
+    }
+  }
+  return null;
+}
+
+// ─── MOUSE EVENTS ───────────────────────────────────────
+canvas.addEventListener('mousedown', e => {
+  if(e.button === 2) return;
+  const pos = getCanvasPos(e);
+
+  if(tool === 'select') {
+    const hit = hitTest(pos);
+    if(hit) {
+      selectedItem = hit;
+      isDragging = true;
+      dragOffset = {x: pos.x - (hit.x || 0), y: pos.y - (hit.y || 0)};
+    } else {
+      selectedItem = null;
+    }
+  } else if(tool === 'room') {
+    isDrawing = true;
+    drawStart = {...pos};
+    drawCurrent = {...pos};
+  } else if(tool === 'checkpoint') {
+    pendingCpPos = pos;
+    document.getElementById('cp-name').value = 'CP-' + String(items.filter(i=>i.type==='checkpoint').length+1).padStart(2,'0');
+    openModal('cp-modal');
+  } else if(tool === 'text') {
+    pendingTextPos = pos;
+    document.getElementById('text-content').value = '';
+    openModal('text-modal');
+  } else if(tool === 'route') {
+    routePoints.push({...pos});
+    if(routePoints.length === 1) notify('Click to add points — double-click to finish route','');
+    redraw();
+  } else if(tool === 'delete') {
+    const hit = hitTest(pos);
+    if(hit) {
+      items = items.filter(i => i !== hit);
+      updateStatus();
+      redraw();
+      notify('Item deleted');
+    }
+  }
+  redraw();
+});
+
+canvas.addEventListener('mousemove', e => {
+  const pos = getCanvasPos(e);
+  if(tool === 'room' && isDrawing) {
+    drawCurrent = {...pos};
+    redraw();
+  } else if(tool === 'select' && isDragging && selectedItem) {
+    selectedItem.x = pos.x - dragOffset.x;
+    selectedItem.y = pos.y - dragOffset.y;
+    redraw();
+  }
+});
+
+canvas.addEventListener('mouseup', e => {
+  if(tool === 'room' && isDrawing) {
+    isDrawing = false;
+    const x = Math.min(drawStart.x, drawCurrent.x);
+    const y = Math.min(drawStart.y, drawCurrent.y);
+    const w = Math.abs(drawCurrent.x - drawStart.x);
+    const h = Math.abs(drawCurrent.y - drawStart.y);
+    if(w > 10 && h > 10) {
+      pendingRoomPos = {x,y,w,h};
+      document.getElementById('room-name').value = '';
+      openModal('room-modal');
+    }
+  }
+  isDragging = false;
+});
+
+canvas.addEventListener('dblclick', e => {
+  if(tool === 'route' && routePoints.length > 1) {
+    routes.push({points:[...routePoints], id: Date.now()});
+    routePoints = [];
+    redraw();
+    notify('Route saved ✓','success');
+  }
+});
+
+// Right-click context menu
+canvas.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  const pos = getCanvasPos(e);
+  const hit = hitTest(pos);
+  if(hit) {
+    ctxTarget = hit;
+    const menu = document.getElementById('ctx-menu');
+    menu.style.left = e.clientX + 'px';
+    menu.style.top = e.clientY + 'px';
+    menu.classList.add('open');
+  }
+});
+
+document.addEventListener('click', e => {
+  if(!e.target.closest('#ctx-menu')) {
+    document.getElementById('ctx-menu').classList.remove('open');
+  }
+});
+
+function ctxAction(action) {
+  document.getElementById('ctx-menu').classList.remove('open');
+  if(!ctxTarget) return;
+  if(action === 'delete') {
+    items = items.filter(i => i !== ctxTarget);
+    updateStatus(); redraw();
+    notify('Deleted');
+  } else if(action === 'rename') {
+    const name = prompt('New name:', ctxTarget.name || '');
+    if(name) { ctxTarget.name = name; redraw(); }
+  } else if(action === 'log-patrol') {
+    logPatrolVisit(ctxTarget);
+  } else if(action === 'change-color') {
+    const colors = ['rgba(0,200,255,0.3)','rgba(0,255,136,0.3)','rgba(255,179,0,0.3)','rgba(255,61,61,0.3)','rgba(150,100,255,0.3)'];
+    const idx = colors.indexOf(ctxTarget.color);
+    ctxTarget.color = colors[(idx+1) % colors.length];
+    redraw();
+  }
+}
+
+// ─── SAVE ROOM ──────────────────────────────────────────
+let pendingRoomPos = null;
+function saveRoom() {
+  const name = document.getElementById('room-name').value.trim() || 'Zone';
+  const type = document.getElementById('room-type').value;
+  if(pendingRoomPos) {
+    items.push({
+      id: Date.now(), type:'room', name, roomType:type,
+      x:pendingRoomPos.x, y:pendingRoomPos.y,
+      w:pendingRoomPos.w, h:pendingRoomPos.h,
+      color:selectedColor
+    });
+    pendingRoomPos = null;
+  }
+  closeModal('room-modal');
+  updateStatus(); redraw();
+  notify('Zone added ✓','success');
+}
+
+// ─── SAVE CHECKPOINT ────────────────────────────────────
+let pendingCpPos = null;
+function saveCheckpoint() {
+  const name = document.getElementById('cp-name').value.trim() || 'CP';
+  const freq = document.getElementById('cp-freq').value;
+  const notes = document.getElementById('cp-notes').value.trim();
+  if(pendingCpPos) {
+    items.push({
+      id: Date.now(), type:'checkpoint', name,
+      x:pendingCpPos.x, y:pendingCpPos.y,
+      freq, notes, lastVisit: null
+    });
+    pendingCpPos = null;
+  }
+  closeModal('cp-modal');
+  updateStatus(); updateCpList(); redraw();
+  notify('Checkpoint added ✓','success');
+}
+
+// ─── SAVE TEXT ──────────────────────────────────────────
+let pendingTextPos = null;
+function saveText() {
+  const text = document.getElementById('text-content').value.trim();
+  if(text && pendingTextPos) {
+    items.push({
+      id: Date.now(), type:'text', name:text,
+      x:pendingTextPos.x, y:pendingTextPos.y,
+      color:selectedTextColor
+    });
+    pendingTextPos = null;
+  }
+  closeModal('text-modal');
+  redraw();
+  notify('Label added ✓','success');
+}
+
+// ─── PATROL ─────────────────────────────────────────────
+function startPatrol() {
+  if(currentPatrol) { notify('Patrol already active!','error'); return; }
+  currentPatrol = { id: Date.now(), start: new Date().toISOString(), visits: [] };
+  document.getElementById('status-patrol').textContent = 'ACTIVE';
+  document.getElementById('status-patrol').style.color = 'var(--green)';
+  updatePatrolLog();
+  notify('Patrol started ✓','success');
+}
+
+function endPatrol() {
+  if(!currentPatrol) { notify('No active patrol','error'); return; }
+  currentPatrol.end = new Date().toISOString();
+  savedPatrols.push({...currentPatrol});
+  currentPatrol = null;
+  document.getElementById('status-patrol').textContent = 'INACTIVE';
+  document.getElementById('status-patrol').style.color = '';
+  updateSavedPatrols();
+  notify('Patrol ended & saved ✓','success');
+}
+
+function logPatrolVisit(item) {
+  if(!currentPatrol) {
+    notify('Start a patrol first!','error');
+    return;
+  }
+  const visit = { cp: item.name, time: new Date().toISOString() };
+  currentPatrol.visits.push(visit);
+  item.lastVisit = visit.time;
+  updatePatrolLog();
+  redraw();
+  notify(`✓ ${item.name} logged`,'success');
+}
+
+function updatePatrolLog() {
+  const log = document.getElementById('patrol-log');
+  if(!currentPatrol || !currentPatrol.visits.length) {
+    log.innerHTML = '<div style="font-family:var(--mono);font-size:9px;color:var(--text3);padding:0 2px;">No visits yet</div>';
+    return;
+  }
+  log.innerHTML = currentPatrol.visits.slice().reverse().map(v => `
+    <div class="log-entry">
+      <span class="log-time">${new Date(v.time).toLocaleTimeString()}</span>
+      <span class="log-cp"> — ${v.cp}</span>
+    </div>
+  `).join('');
+}
+
+function updateCpList() {
+  const list = document.getElementById('cp-list');
+  const cps = items.filter(i => i.type === 'checkpoint');
+  if(!cps.length) {
+    list.innerHTML = '<div style="font-family:var(--mono);font-size:9px;color:var(--text3);padding:0 2px;">No checkpoints yet</div>';
+    return;
+  }
+  list.innerHTML = cps.map(cp => `
+    <div class="cp-item" onclick="logPatrolVisit(items.find(i=>i.id===${cp.id}))">
+      <div class="cp-dot"></div>
+      ${cp.name}
+      <span class="cp-time">${cp.lastVisit ? new Date(cp.lastVisit).toLocaleTimeString() : '—'}</span>
+    </div>
+  `).join('');
+}
+
+function updateSavedPatrols() {
+  const list = document.getElementById('saved-patrols');
+  if(!savedPatrols.length) { list.innerHTML = ''; return; }
+  list.innerHTML = savedPatrols.slice().reverse().map(p => `
+    <div class="cp-item">
+      <div class="cp-dot" style="background:var(--gold)"></div>
+      ${new Date(p.start).toLocaleDateString()} ${new Date(p.start).toLocaleTimeString()}
+      <span class="cp-time">${p.visits.length} visits</span>
+    </div>
+  `).join('');
+}
+
+// ─── DRAW ───────────────────────────────────────────────
+function redraw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.save();
+  ctx.translate(panX, panY);
+  ctx.scale(scale, scale);
+
+  // Background image
+  if(bgImage) {
+    ctx.globalAlpha = 0.5;
+    ctx.drawImage(bgImage, 0, 0, canvas.width/scale, canvas.height/scale);
+    ctx.globalAlpha = 1;
+  }
+
+  // Draw rooms
+  items.filter(i=>i.type==='room').forEach(item => {
+    ctx.fillStyle = item.color || 'rgba(0,200,255,0.2)';
+    ctx.fillRect(item.x, item.y, item.w, item.h);
+    ctx.strokeStyle = (item.color||'rgba(0,200,255,0.5)').replace(/[\d.]+\)$/,'0.8)');
+    ctx.lineWidth = 1.5/scale;
+    ctx.strokeRect(item.x, item.y, item.w, item.h);
+    // Label
+    ctx.fillStyle = '#c8e0f0';
+    ctx.font = `${Math.max(10, 12/scale)}px Rajdhani`;
+    ctx.textAlign = 'center';
+    ctx.fillText(item.name, item.x+item.w/2, item.y+item.h/2);
+    // Type badge
+    ctx.font = `${Math.max(8, 9/scale)}px Share Tech Mono`;
+    ctx.fillStyle = 'rgba(200,224,240,0.4)';
+    ctx.fillText(item.roomType?.toUpperCase()||'', item.x+item.w/2, item.y+item.h/2+14/scale);
+
+    if(selectedItem === item) {
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2/scale;
+      ctx.setLineDash([4/scale, 4/scale]);
+      ctx.strokeRect(item.x-2, item.y-2, item.w+4, item.h+4);
+      ctx.setLineDash([]);
+    }
+  });
+
+  // Draw routes
+  routes.forEach(route => {
+    if(route.points.length < 2) return;
+    ctx.beginPath();
+    ctx.moveTo(route.points[0].x, route.points[0].y);
+    route.points.forEach((p,i) => { if(i>0) ctx.lineTo(p.x,p.y); });
+    ctx.strokeStyle = 'rgba(255,179,0,0.8)';
+    ctx.lineWidth = 2/scale;
+    ctx.setLineDash([8/scale, 4/scale]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    // Arrow at end
+    const last = route.points[route.points.length-1];
+    const prev = route.points[route.points.length-2];
+    const angle = Math.atan2(last.y-prev.y, last.x-prev.x);
+    const as = 10/scale;
+    ctx.beginPath();
+    ctx.moveTo(last.x, last.y);
+    ctx.lineTo(last.x-as*Math.cos(angle-0.4), last.y-as*Math.sin(angle-0.4));
+    ctx.moveTo(last.x, last.y);
+    ctx.lineTo(last.x-as*Math.cos(angle+0.4), last.y-as*Math.sin(angle+0.4));
+    ctx.strokeStyle = 'rgba(255,179,0,1)';
+    ctx.lineWidth = 2/scale;
+    ctx.setLineDash([]);
+    ctx.stroke();
+  });
+
+  // Current route being drawn
+  if(tool === 'route' && routePoints.length > 0) {
+    ctx.beginPath();
+    ctx.moveTo(routePoints[0].x, routePoints[0].y);
+    routePoints.forEach((p,i) => { if(i>0) ctx.lineTo(p.x,p.y); });
+    ctx.strokeStyle = 'rgba(255,179,0,0.5)';
+    ctx.lineWidth = 1.5/scale;
+    ctx.setLineDash([6/scale,4/scale]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    routePoints.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,4/scale,0,Math.PI*2);
+      ctx.fillStyle='rgba(255,179,0,0.8)';
+      ctx.fill();
+    });
+  }
+
+  // Drawing room preview
+  if(tool === 'room' && isDrawing) {
+    const x = Math.min(drawStart.x,drawCurrent.x);
+    const y = Math.min(drawStart.y,drawCurrent.y);
+    const w = Math.abs(drawCurrent.x-drawStart.x);
+    const h = Math.abs(drawCurrent.y-drawStart.y);
+    ctx.fillStyle = 'rgba(0,200,255,0.1)';
+    ctx.fillRect(x,y,w,h);
+    ctx.strokeStyle = 'rgba(0,200,255,0.6)';
+    ctx.lineWidth = 1.5/scale;
+    ctx.setLineDash([6/scale,3/scale]);
+    ctx.strokeRect(x,y,w,h);
+    ctx.setLineDash([]);
+  }
+
+  // Draw checkpoints
+  items.filter(i=>i.type==='checkpoint').forEach(item => {
+    const isRecent = item.lastVisit && (Date.now() - new Date(item.lastVisit).getTime()) < 5*60*1000;
+    const color = isRecent ? '#00ff88' : '#00c8ff';
+    // Outer ring
+    ctx.beginPath();
+    ctx.arc(item.x, item.y, 16/scale, 0, Math.PI*2);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1.5/scale;
+    ctx.stroke();
+    // Inner dot
+    ctx.beginPath();
+    ctx.arc(item.x, item.y, 6/scale, 0, Math.PI*2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    // Label
+    ctx.fillStyle = color;
+    ctx.font = `bold ${Math.max(9,10/scale)}px Share Tech Mono`;
+    ctx.textAlign = 'center';
+    ctx.fillText(item.name, item.x, item.y - 20/scale);
+    if(item.lastVisit) {
+      ctx.font = `${Math.max(7,8/scale)}px Share Tech Mono`;
+      ctx.fillStyle = 'rgba(200,224,240,0.5)';
+      ctx.fillText(new Date(item.lastVisit).toLocaleTimeString(), item.x, item.y+26/scale);
+    }
+    if(selectedItem === item) {
+      ctx.beginPath();
+      ctx.arc(item.x,item.y,20/scale,0,Math.PI*2);
+      ctx.strokeStyle='#ffffff';
+      ctx.lineWidth=1.5/scale;
+      ctx.setLineDash([3/scale,3/scale]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  });
+
+  // Draw text labels
+  items.filter(i=>i.type==='text').forEach(item => {
+    ctx.font = `${Math.max(10,14/scale)}px Rajdhani`;
+    ctx.fillStyle = item.color || '#00c8ff';
+    ctx.textAlign = 'left';
+    ctx.fillText(item.name, item.x, item.y);
+    if(selectedItem === item) {
+      const w = ctx.measureText(item.name).width;
+      ctx.strokeStyle='#ffffff';
+      ctx.lineWidth=1/scale;
+      ctx.setLineDash([3/scale,2/scale]);
+      ctx.strokeRect(item.x-2,item.y-14/scale,w+4,16/scale);
+      ctx.setLineDash([]);
+    }
+  });
+
+  ctx.restore();
+}
+
+// ─── ZOOM & PAN ─────────────────────────────────────────
+function zoom(factor) {
+  scale *= factor;
+  scale = Math.min(4, Math.max(0.2, scale));
+  document.getElementById('status-zoom').textContent = Math.round(scale*100)+'%';
+  redraw();
+}
+function resetZoom() { scale=1; panX=0; panY=0; document.getElementById('status-zoom').textContent='100%'; redraw(); }
+
+// Middle mouse pan
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  if(e.ctrlKey) { zoom(e.deltaY < 0 ? 1.1 : 0.9); }
+  else { panX -= e.deltaX; panY -= e.deltaY; redraw(); }
+}, {passive:false});
+
+// ─── BG IMAGE ───────────────────────────────────────────
+function loadBgImage(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => { bgImage = img; redraw(); notify('Floor plan loaded ✓','success'); };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  e.target.value='';
+}
+function clearBg() { bgImage=null; redraw(); notify('Background cleared'); }
+
+// ─── EXPORT / IMPORT ────────────────────────────────────
+function exportData() {
+  const data = { items, routes, savedPatrols, exported: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sitemap_'+new Date().toISOString().split('T')[0]+'.json';
+  a.click();
+  notify('Exported ✓','success');
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      items = data.items || [];
+      routes = data.routes || [];
+      savedPatrols = data.savedPatrols || [];
+      updateStatus(); updateCpList(); updateSavedPatrols(); redraw();
+      notify('Imported ✓','success');
+    } catch(err) { notify('Invalid file','error'); }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+// ─── PRINT ──────────────────────────────────────────────
+function printMap() {
+  const dataUrl = canvas.toDataURL();
+  const win = window.open('','_blank');
+  win.document.write(`<html><body style="margin:0"><img src="${dataUrl}" style="max-width:100%"><script>window.onload=()=>window.print()<\/script></body></html>`);
+}
+
+// ─── CLEAR ALL ──────────────────────────────────────────
+function clearAll() {
+  if(!confirm('Clear everything from the map?')) return;
+  items=[]; routes=[]; selectedItem=null;
+  updateStatus(); updateCpList(); redraw();
+  notify('Map cleared');
+}
+
+// ─── STATUS ─────────────────────────────────────────────
+function updateStatus() {
+  document.getElementById('status-items').textContent = items.length;
+  document.getElementById('status-cp').textContent = items.filter(i=>i.type==='checkpoint').length;
+  updateCpList();
+}
+
+// ─── MODALS ─────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); }));
+
+// ─── NOTIFY ─────────────────────────────────────────────
+function notify(msg, type='') {
+  const el = document.getElementById('notif');
+  el.textContent = msg;
+  el.className = 'notif show' + (type?' '+type:'');
+  setTimeout(()=>el.classList.remove('show'), 2500);
+}
+
+// Initial draw
+redraw();
+</script>
+</body>
+</html>
